@@ -1,5 +1,6 @@
 package com.mephi.service;
 
+import com.mephi.dao.UserDaoJDBCImpl;
 import com.mephi.dao.UserDaoHibernateImpl;
 import com.mephi.model.User;
 

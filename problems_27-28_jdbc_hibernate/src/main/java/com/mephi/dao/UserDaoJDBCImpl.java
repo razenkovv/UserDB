@@ -7,20 +7,20 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserDaoJDBCImpl implements UserDao{
-    public UserDaoJDBCImpl() {}
+public class UserDaoJDBCImpl implements UserDao {
+    public UserDaoJDBCImpl() {
+    }
+
     @Override
     public void createUsersTable() {
-        try (Connection connection = JDBCUtil.getDataSource().getConnection()) {
-            try (Statement st = connection.createStatement()) {
-                String create = "CREATE TABLE IF NOT EXISTS _user (";
-                String strId = "id BIGSERIAL,";
-                String strName = "name VARCHAR(100),";
-                String strLastName = "lastName VARCHAR(100),";
-                String strAge = "age SMALLINT,";
-                String strPkey = "PRIMARY KEY (id));";
-                st.executeUpdate(create + strId + strName + strLastName + strAge + strPkey);
-            }
+        try (Connection connection = JDBCUtil.getDataSource().getConnection(); Statement st = connection.createStatement()) {
+            String create = "CREATE TABLE IF NOT EXISTS _user (";
+            String strId = "id BIGSERIAL,";
+            String strName = "name VARCHAR(100),";
+            String strLastName = "lastName VARCHAR(100),";
+            String strAge = "age SMALLINT,";
+            String strPkey = "PRIMARY KEY (id));";
+            st.executeUpdate(create + strId + strName + strLastName + strAge + strPkey);
         } catch (SQLException e) {
             e.printStackTrace();
         }

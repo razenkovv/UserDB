@@ -1,5 +1,6 @@
 package com.mephi.model;
 
+import jakarta.persistence.metamodel.StaticMetamodel;
 import lombok.*;
 import jakarta.persistence.*;
 

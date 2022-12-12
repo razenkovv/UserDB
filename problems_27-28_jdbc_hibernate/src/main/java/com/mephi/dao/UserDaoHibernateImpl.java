@@ -9,9 +9,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.hibernate.query.criteria.JpaCriteriaDelete;
-import org.hibernate.query.criteria.JpaCriteriaQuery;
 
-import javax.persistence.criteria.CriteriaDelete;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +17,7 @@ public class UserDaoHibernateImpl implements UserDao{
 
     @Override
     public void createUsersTable() {
+        Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             String create = "CREATE TABLE IF NOT EXISTS _user (";
             String strId = "id BIGSERIAL,";
@@ -27,35 +26,43 @@ public class UserDaoHibernateImpl implements UserDao{
             String strAge = "age SMALLINT,";
             String strPkey = "PRIMARY KEY (id));";
 
-            Transaction transaction = session.beginTransaction();
+            transaction = session.beginTransaction();
             session.createNativeQuery(create + strId + strName + strLastName + strAge + strPkey, User.class).executeUpdate();
             transaction.commit();
         } catch (IllegalArgumentException | HibernateException e) {
+            if (transaction != null)
+                transaction.rollback();
             e.printStackTrace();
         }
     }
 
     @Override
     public void dropUsersTable() {
+        Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             String drop = "DROP TABLE IF EXISTS _user;";
 
-            Transaction transaction = session.beginTransaction();
+            transaction = session.beginTransaction();
             session.createNativeQuery(drop, User.class).executeUpdate();
             transaction.commit();
         } catch (IllegalArgumentException | HibernateException e) {
+            if (transaction != null)
+                transaction.rollback();
             e.printStackTrace();
         }
     }
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
+        Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             User user = new User(name, lastName, age);
-            Transaction transaction = session.beginTransaction();
+            transaction = session.beginTransaction();
             session.persist(user);
             transaction.commit();
         } catch (IllegalArgumentException | HibernateException e) {
+            if (transaction != null)
+                transaction.rollback();
             e.printStackTrace();
         }
 
@@ -63,12 +70,15 @@ public class UserDaoHibernateImpl implements UserDao{
 
     @Override
     public void removeUserById(long id) {
+        Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Transaction transaction = session.beginTransaction();
             User user = session.get(User.class, id);
+           transaction = session.beginTransaction();
             session.remove(user);
             transaction.commit();
         } catch (IllegalArgumentException | HibernateException e) {
+            if (transaction != null)
+                transaction.rollback();
             e.printStackTrace();
         }
     }
@@ -76,16 +86,19 @@ public class UserDaoHibernateImpl implements UserDao{
     @Override
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
+        Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             HibernateCriteriaBuilder cb = session.getCriteriaBuilder();
-            JpaCriteriaQuery<User> cq = cb.createQuery(User.class);
+            CriteriaQuery<User> cq = cb.createQuery(User.class);
             Root<User> root = cq.from(User.class);
-            cq.select(root);
+            cq.select(root).orderBy(cb.asc(root.get("age")));
 
-            Transaction transaction = session.beginTransaction();
+            transaction = session.beginTransaction();
             users = session.createQuery(cq).getResultList();
             transaction.commit();
         } catch (IllegalArgumentException | HibernateException e) {
+            if (transaction != null)
+                transaction.rollback();
             e.printStackTrace();
         }
         return users;
@@ -93,14 +106,17 @@ public class UserDaoHibernateImpl implements UserDao{
 
     @Override
     public void cleanUsersTable() {
+        Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             HibernateCriteriaBuilder cb = session.getCriteriaBuilder();
             JpaCriteriaDelete<User> cd = cb.createCriteriaDelete(User.class);
 
-            Transaction transaction = session.beginTransaction();
+            transaction = session.beginTransaction();
             session.createMutationQuery(cd).executeUpdate();
             transaction.commit();
         } catch (IllegalArgumentException | HibernateException e) {
+            if (transaction != null)
+                transaction.rollback();
             e.printStackTrace();
         }
     }
